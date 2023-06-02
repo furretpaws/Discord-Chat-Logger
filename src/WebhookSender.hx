@@ -9,4 +9,7 @@ class WebhookSender {
         http.addHeader("Content-Type", "application/json");
         http.request(true);
     }
+    public function getHttp():haxe.Http {
+        return new haxe.Http(url);
+    }
 }

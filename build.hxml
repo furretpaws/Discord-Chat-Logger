@@ -4,3 +4,4 @@
 --neko main.n
 -L hxdiscord
 -L hxWebSockets
+-L tink_http
