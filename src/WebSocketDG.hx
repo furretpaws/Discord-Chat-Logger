@@ -20,11 +20,7 @@ class WebSocketDG {
         target_id = File.getContent("guild_id_target.txt");
         ws = new WebSocket("wss://gateway.discord.gg/?v=10&encoding=json");
         ws.onopen = () -> {
-            trace("ws open");
-            trace("uhm");
             @:privateAccess
-            //Main.webhook.send({username: "!", content:"`Discord Gateway connection successfully initialized`"});
-            trace("uhm");
         }
         ws.onmessage = (m:MessageType) -> {
             switch(m) {
@@ -34,6 +30,12 @@ class WebSocketDG {
                 case BytesMessage(bytes):
                     //trace(bytes);
             }
+        }
+        ws.onclose = () -> {
+            startTheThing();
+        }
+        ws.onerror = (err:Dynamic) -> {
+            //well go fuck yourself
         }
     }
     static function incomingMessages(content:String, ws:WebSocket) {
