@@ -52,6 +52,10 @@ class Main {
 				required: true
 			});
 			setWebhook.default_member_permissions = "0";
+			var reload:ApplicationCommand = new ApplicationCommand();
+			reload.setName("reload");
+			reload.setDescription("If you made some changes to the bot, you can reload the entire logger with the new configuration set");
+			reload.default_member_permissions = "0";
 			BotClient.setInteractionCommands([setTargetServer, setToken, setWebhook]);
 		}
 		BotClient.onInteractionCreate = (i:Interaction) -> {
@@ -67,6 +71,10 @@ class Main {
 					i.reply({content:"Webhook changed successfully"}, true);
 					webhook = new WebhookSender(File.getContent("webhook.txt"));
 					webhook.send({username: "!", content: "`The webhook has been successfully configured`"});
+				case "reload":
+					WebSocketDG.stopEverything();
+					WebSocketDG.startTheThing();
+					i.reply({content:"Logger reloaded successfully"});	
 			}
 		}
 		BotClient.onMessageCreate = (m:Message) -> {

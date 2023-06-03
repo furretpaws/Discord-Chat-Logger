@@ -44,8 +44,22 @@ class WebSocketDG {
             //well go fuck yourself
         }
     }
+    public static function stopEverything() {
+        ws.close();
+        hb_timer.stop();
+        ws = null;
+        hb_timer = null;
+        sequence = 0;
+        target_id = "";
+        channel_names = new Map<String, String>();
+        server_name = "";
+        resume_gateway_url = "wss://gateway.discord.gg/?v=10&encoding=json";
+        session_id = "";
+        interval = 0;
+        canResume = false;
+    }
     static function incomingMessages(content:String) {
-        //trace(content);
+        trace(content);
         var JSON:Dynamic = haxe.Json.parse(content);
         var t:String = JSON.t;
         var s:Int = JSON.s;
