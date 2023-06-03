@@ -10,72 +10,90 @@ using StringTools;
 
 class WebSocketDG {
     static var ws:WebSocket;
-    static var timer:Timer;
+    static var hb_timer:Timer;
     static var sequence:Int = 0;
     static var target_id:String = "";
     static var channel_names:Map<String, String> = new Map<String, String>();
     static var server_name:String = "";
+    static var resume_gateway_url:String = "wss://gateway.discord.gg/?v=10&encoding=json";
+    static var session_id:String = "";
+    static var interval:Int = 0;
+    static var canResume:Bool = false;
     static var allowedChannels:Array<String> = ["1080541900232196116", "1066159653643354234", "1066159668558299216", "1066159662199746591", "1066159673637605516", "1066159675214680154", "1066159692155473920", "1071707851493482617", "1103416658124607548"];
     public static function startTheThing() {
         target_id = File.getContent("guild_id_target.txt");
-        ws = new WebSocket("wss://gateway.discord.gg/?v=10&encoding=json");
+        ws = new WebSocket(resume_gateway_url);
         ws.onopen = () -> {
-            @:privateAccess
+            
         }
         ws.onmessage = (m:MessageType) -> {
             switch(m) {
                 case StrMessage(content):
                     //trace(content);
-                    incomingMessages(content, ws);
+                    incomingMessages(content);
                 case BytesMessage(bytes):
                     //trace(bytes);
             }
         }
         ws.onclose = () -> {
+            hb_timer.stop();
+            ws = null;
             startTheThing();
         }
         ws.onerror = (err:Dynamic) -> {
             //well go fuck yourself
         }
     }
-    static function incomingMessages(content:String, ws:WebSocket) {
-        var json:Dynamic = haxe.Json.parse(content);
-        var s:Int = json.s;
-        var t:String = json.t;
-        var d:Dynamic = json.d;
-        var op:Int = json.op;
+    static function incomingMessages(content:String) {
+        //trace(content);
+        var JSON:Dynamic = haxe.Json.parse(content);
+        var t:String = JSON.t;
+        var s:Int = JSON.s;
+        var op:Int = JSON.op;
+        var d:Dynamic = JSON.d;
         switch(op) {
-            case 10:
-                //hello uwu (because op code 10 HELLO, GET IT, HAHAHAHAAH (i'm not funny))
-                trace("uhm");
+            case 10: //"Hello" OpCode
+                //hi discord uwu
+                interval = d.heartbeat_interval;
+                ws.send(haxe.Json.stringify({op:1, d: null})); 
                 haxe.EntryPoint.runInMainThread(()->{
-                    timer = new Timer(d.heartbeat_interval);
-                    timer.run = () -> {
-                        ws.send(haxe.Json.stringify({
-                            op: 1, d: null
-                        }));
+                    hb_timer = new haxe.Timer(interval);
+                    hb_timer.run = () -> {
+                        ws.send(haxe.Json.stringify({op:1, d: null})); 
                     }
                 });
-                trace("oop");
-                ws.send(haxe.Json.stringify({
-                    op: 2,
-                    d: {
-                        token: File.getContent("token.txt"),
-                        properties: {
-                            os: "os",
-                            browser: "a browser",
-                            device: "bryn"
-                        },
-                        intents: 3276799
-                    }
-                }));
-                trace("s");
-            case 11:
-                //lol
+                if (canResume) {
+                    ws.send(haxe.Json.stringify({
+                        op: 6,
+                        d: {
+                            token: File.getContent("token.txt"),
+                            session_id: session_id,
+                            seq: sequence
+                        }
+                    }));
+                } else {
+                    ws.send(haxe.Json.stringify({
+                        "op": 2,
+                        "d": {
+                                "token": File.getContent("token.txt"),
+                                "properties": {
+                                    "os": "a",
+                                    "browser": "B",
+                                    "device": "C"
+                                },
+                            // This intent represents 1 << 0 for GUILDS, 1 << 1 for GUILD_MEMBERS, and 1 << 2 for GUILD_BANS
+                            // This connection will only receive the events defined in those three intents
+                            "intents": 3276799
+                        }
+                    }));
+                }
+            case 9:
+                ws.close();
+            case 7:
+                ws.close();
             case 0:
                 sequence = s;
-                //trace("this is opcode 0");
-                //trace("and this is " + t);
+                trace("This is " + t);
                 switch(t) {
                     case "READY":
                         //trace("h");
@@ -92,10 +110,10 @@ class WebSocketDG {
                     case "GUILD_CREATE":
                         //trace(haxe.Json.stringify(d));
                     case "MESSAGE_CREATE":
-                        //trace("yes");
+                        trace("yes");
                         if (d.guild_id == target_id) {
-                            //trace("yes");
-                            //trace(canILogThisChannel(d.channel_id));
+                            trace("yes");
+                            trace(canILogThisChannel(d.channel_id));
                             if (canILogThisChannel(d.channel_id)) {
                                 //funny
                                 if (d.attachments.length > 0) {
@@ -154,11 +172,6 @@ class WebSocketDG {
                             }
                         }
                 }
-            case 7:
-                sequence = 0;
-                timer.stop();
-                ws.close();
-                startTheThing();
         }
     }
 
