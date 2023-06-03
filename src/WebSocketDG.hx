@@ -30,7 +30,9 @@ class WebSocketDG {
             switch(m) {
                 case StrMessage(content):
                     //trace(content);
-                    incomingMessages(content);
+                    haxe.EntryPoint.runInMainThread(()->{
+                        incomingMessages(content);
+                    });
                 case BytesMessage(bytes):
                     //trace(bytes);
             }
@@ -137,6 +139,7 @@ class WebSocketDG {
                             //trace("yes");
                             //trace(canILogThisChannel(d.channel_id));
                             if (canILogThisChannel(d.channel_id)) {
+                                
                                 //funny
                                 if (d.attachments.length > 0) {
                                     sys.thread.Thread.create(()->{
@@ -160,7 +163,25 @@ class WebSocketDG {
                                         }
                                         if (d.content == "") {
                                             if (Main.showMessageUrl) {
-                                                BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: " ", attachments: attachments, "embeds": [
+                                                if (d.referenced_message != null) {
+                                                    BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: " ", attachments: attachments, "embeds": [
+                                                    {
+                                                        "fields": [
+                                                            {
+                                                                "name": "Replying to "+d.referenced_message.author.username,
+                                                                "value": d.referenced_message.author.username+"#"+d.referenced_message.author.discriminator+": "+d.referenced_message.content,
+                                                                "inline": false
+                                                            },
+                                                            {
+                                                                "name": "Message URL",
+                                                                "value": "https://furret.net/",
+                                                                "inline": false
+                                                            }
+                                                        ]
+                                                    }
+                                                    ]}));
+                                                } else {
+                                                    BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: " ", attachments: attachments, "embeds": [
                                                     {
                                                         "fields": [
                                                             {
@@ -170,14 +191,33 @@ class WebSocketDG {
                                                             }
                                                         ]
                                                     }
-                                                ]}));
+                                                    ]}));
+                                                }
                                             } else {
                                                 BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: " ", attachments: attachments}));
                                             }
                                         } else {
                                             trace(Main.showMessageUrl);
                                             if (Main.showMessageUrl) {
-                                                BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: "`"+d.content+"`", "embeds": [
+                                                if (d.referenced_message != null) {
+                                                    BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: "`"+d.content+"`", attachments: attachments, "embeds": [
+                                                    {
+                                                        "fields": [
+                                                            {
+                                                                "name": "Replying to "+d.referenced_message.author.username,
+                                                                "value": d.referenced_message.author.username+"#"+d.referenced_message.author.discriminator+": "+d.referenced_message.content,
+                                                                "inline": false
+                                                            },
+                                                            {
+                                                                "name": "Message URL",
+                                                                "value": "https://furret.net/",
+                                                                "inline": false
+                                                            }
+                                                        ]
+                                                    }
+                                                    ]}));
+                                                } else {
+                                                    BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: "`"+d.content+"`", attachments: attachments, "embeds": [
                                                     {
                                                         "fields": [
                                                             {
@@ -187,13 +227,14 @@ class WebSocketDG {
                                                             }
                                                         ]
                                                     }
-                                                ]}));
+                                                    ]}));
+                                                }
                                             } else {
-                                                BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: "`"+d.content+"`"}));
+                                                BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", attachments: attachments, content: "`"+d.content+"`"}));
                                             }
                                         }
                                         for (i in 0...d.attachments.length) {
-                                            //BO.writeString('\n--boundary\n');
+                                            BO.writeString('\n--boundary\n');
                                             BO.writeString('Content-Disposition: form-data; name="files[' + i + ']"; filename="' + d.attachments[i].filename + '"' + "\n");
                                             BO.writeString('Content-Type: ' + hxdiscord.utils.MimeResolver.getMimeType(d.attachments[i].filename)); //idk why's base64 there but it works so i'm leaving it like that
                                             BO.writeString("\n\n");
@@ -217,7 +258,40 @@ class WebSocketDG {
                                     @:privateAccess
                                     var http:haxe.Http = Main.webhook.getHttp();
                                     http.addHeader("Content-Type", "application/json");
-                                    http.setPostData(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: "`"+d.content+"`"}));
+                                    if (Main.showMessageUrl) {
+                                        if (d.referenced_message != null) {
+                                            http.setPostData(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: "`"+d.content+"`", "embeds": [
+                                            {
+                                                "fields": [
+                                                    {
+                                                        "name": "Replying to "+d.referenced_message.author.username,
+                                                        "value": d.referenced_message.author.username+"#"+d.referenced_message.author.discriminator+": "+d.referenced_message.content,
+                                                        "inline": false
+                                                    },
+                                                    {
+                                                        "name": "Message URL",
+                                                        "value": "https://furret.net/",
+                                                        "inline": false
+                                                    }
+                                                ]
+                                            }
+                                            ]}));
+                                        } else {
+                                            http.setPostData(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: "`"+d.content+"`", "embeds": [
+                                            {
+                                                "fields": [
+                                                    {
+                                                        "name": "Message URL",
+                                                        "value": "https://discord.com/channels/"+d.guild_id+"/"+d.channel_id+"/"+d.id,
+                                                        "inline": false
+                                                    }
+                                                ]
+                                            }
+                                            ]}));
+                                        }
+                                    } else {
+                                        http.setPostData(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png",  content: "`"+d.content+"`"}));
+                                    }
                                     http.request(true);
                                 }
                             }
