@@ -12,6 +12,7 @@ using StringTools;
 class Main {
 	static var BotClient:DiscordClient;
 	static var webhook:WebhookSender = null;
+	public static var showMessageUrl:Bool = true;
 	static function main() {
 		if (FileSystem.exists("webhook.txt")) {
 			webhook = new WebhookSender(File.getContent("webhook.txt"));
@@ -56,7 +57,7 @@ class Main {
 			reload.setName("reload");
 			reload.setDescription("If you made some changes to the bot, you can reload the entire logger with the new configuration set");
 			reload.default_member_permissions = "0";
-			BotClient.setInteractionCommands([setTargetServer, setToken, setWebhook]);
+			BotClient.setInteractionCommands([setTargetServer, setToken, setWebhook, reload]);
 		}
 		BotClient.onInteractionCreate = (i:Interaction) -> {
 			switch(i.name) {

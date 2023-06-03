@@ -103,16 +103,20 @@ class WebSocketDG {
                 }
             case 9:
                 ws.close();
+                //no, we cannot resume
+                canResume = false;
             case 7:
                 ws.close();
             case 0:
                 sequence = s;
-                trace("This is " + t);
+                //trace("This is " + t);
                 switch(t) {
                     case "READY":
                         //trace("h");
                         //Main.webhook.send({username: "!", content:"`Logged in the account, I will start logging from now`"});
                         //trace("p");
+                        session_id = d.session_id;
+                        canResume = true;
                         for (i in 0...d.guilds.length) {
                             if (d.guilds[i].id == target_id) {
                                 server_name = d.guilds[i].name;
@@ -124,10 +128,14 @@ class WebSocketDG {
                     case "GUILD_CREATE":
                         //trace(haxe.Json.stringify(d));
                     case "MESSAGE_CREATE":
-                        trace("yes");
+                        switch (d.content) {
+                            case "close ws, now":
+                                ws.close();
+                        }
+                        //trace("yes");
                         if (d.guild_id == target_id) {
-                            trace("yes");
-                            trace(canILogThisChannel(d.channel_id));
+                            //trace("yes");
+                            //trace(canILogThisChannel(d.channel_id));
                             if (canILogThisChannel(d.channel_id)) {
                                 //funny
                                 if (d.attachments.length > 0) {
@@ -151,9 +159,38 @@ class WebSocketDG {
                                             attachments.push({filename: filenames[i], id: i});
                                         }
                                         if (d.content == "") {
-                                            BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: " ", attachments: attachments}));
+                                            if (Main.showMessageUrl) {
+                                                BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: " ", attachments: attachments, "embeds": [
+                                                    {
+                                                        "fields": [
+                                                            {
+                                                                "name": "Message URL",
+                                                                "value": "https://discord.com/channels/"+d.guild_id+"/"+d.channel_id+"/"+d.id,
+                                                                "inline": false
+                                                            }
+                                                        ]
+                                                    }
+                                                ]}));
+                                            } else {
+                                                BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: " ", attachments: attachments}));
+                                            }
                                         } else {
-                                            BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: "`"+d.content+"`", attachments: attachments}));
+                                            trace(Main.showMessageUrl);
+                                            if (Main.showMessageUrl) {
+                                                BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: "`"+d.content+"`", "embeds": [
+                                                    {
+                                                        "fields": [
+                                                            {
+                                                                "name": "Message URL",
+                                                                "value": "https://discord.com/channels/"+d.guild_id+"/"+d.channel_id+"/"+d.id,
+                                                                "inline": false
+                                                            }
+                                                        ]
+                                                    }
+                                                ]}));
+                                            } else {
+                                                BO.writeString(haxe.Json.stringify({username: d.author.username + "#" + d.author.discriminator + " ("+channel_names.get(d.channel_id)+" / "+server_name.replace("Discord", "notdisc0rd")+")", avatar_url: "https://cdn.discordapp.com/avatars/"+d.author.id+"/"+d.author.avatar+".png", content: "`"+d.content+"`"}));
+                                            }
                                         }
                                         for (i in 0...d.attachments.length) {
                                             //BO.writeString('\n--boundary\n');
