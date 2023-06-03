@@ -139,7 +139,7 @@ class WebSocketDG {
                                 ws.close();
                         }
                         //trace("yes");
-                        if (true) {
+                        if (d.guild_id == target_id) {
                             //trace("yes");
                             //trace(canILogThisChannel(d.channel_id));
                             if (canILogThisChannel(d.channel_id)) {
