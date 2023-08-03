@@ -2645,7 +2645,9 @@
    <depend name="include/Sys.h"/>
    <depend name="include/WebSocketDG.h"/>
    <depend name="include/WebhookSender.h"/>
+   <depend name="include/haxe/Log.h"/>
    <depend name="include/haxe/Timer.h"/>
+   <depend name="include/haxe/format/JsonParser.h"/>
    <depend name="include/haxe/format/JsonPrinter.h"/>
    <depend name="include/hxdiscord/DiscordClient.h"/>
    <depend name="include/hxdiscord/endpoints/Endpoints.h"/>

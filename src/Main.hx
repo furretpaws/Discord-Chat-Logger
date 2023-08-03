@@ -40,13 +40,27 @@ class Main {
 			throw "A new config.json file has been generated, edit the file and open the program again.\n\nCheck https://github.com/FurretDev/Discord-Chat-Logger for more information";
 			#end
 			Sys.exit(0);
+		} else {
+			var file:String = File.getContent("config.json");
+			var parsed:Dynamic = null;
+			try {
+				parsed = Json.parse(file);
+			} catch (err) {
+				#if cpp
+				untyped __cpp__('MessageBoxA(NULL, "This JSON file is corrupted.\\n\\nCheck https://github.com/FurretDev/Discord-Chat-Logger for more information", "Uh oh", MB_ICONEXCLAMATION);');
+				#else
+				throw "This JSON file is corrupted";
+				#end
+				Sys.exit(0);
+			}
+			bot_token = parsed.bot_token;
 		}
 		Sys.println('[NOTE] If you don\'t see the "successfully started" message this is due to an issue with your token. Check these steps to reassure everything is okay');
 		Sys.println('1. Check that the intents "Presence Intent", "Server Member Intent" and "Message Content Intent" are enabled in your bot. You can change this on the Discord Developer Portal');
 		Sys.println('2. Check that if your token is not invalid or expired');
 		Sys.println('3. Check if you have internet (This sounds stupid but it is possible for that to happen)');
 		Sys.println('');
-		BotClient = new DiscordClient("MTEyODAyNjI0NjA4MTY3OTM3MA.GQ2uU5.", [Intents.ALL], false);
+		BotClient = new DiscordClient(bot_token, [Intents.ALL], false);
 		BotClient.onReady = () -> {
 			Sys.println('[Discord Chat Logger] Successfully initialized as ${BotClient.user.username}');
 			var setTargetServer:ApplicationCommand = new ApplicationCommand();
