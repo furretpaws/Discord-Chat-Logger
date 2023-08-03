@@ -7,11 +7,19 @@ import sys.io.File;
 import sys.FileSystem;
 import hxdiscord.types.CommandType;
 import hxdiscord.utils.Intents;
+import haxe.Json;
 using StringTools;
+
+#if cpp
+@:cppFileCode('
+#include <windows.h>
+')
+#end
 
 class Main {
 	static var BotClient:DiscordClient;
 	static var webhook:WebhookSender = null;
+	static var bot_token:String = "";
 	public static var showMessageUrl:Bool = true;
 	static function main() {
 		if (FileSystem.exists("webhook.txt")) {
@@ -20,9 +28,27 @@ class Main {
 		if (FileSystem.exists("token.txt") && FileSystem.exists("guild_id_target.txt")) {
 			WebSocketDG.startTheThing();
 		}
-		BotClient = new DiscordClient("MTExNDE2Nzg2NzY5MzMzODY3NA.Go6VHu.i6Hv8r1eIRMHR-Qb49j8EMo1sjWzFL_PSrTRC0", [Intents.ALL], false);
+		if (!FileSystem.exists("config.json")) {
+			File.saveContent("config.json", haxe.Json.stringify(
+				{
+					bot_token: ""
+				}
+			, "\t"));
+			#if cpp
+			untyped __cpp__('MessageBoxA(NULL, "A new config.json file has been generated, edit the file and open the program again.\\n\\nCheck https://github.com/FurretDev/Discord-Chat-Logger for more information", "Edit the config.json file", MB_ICONEXCLAMATION);');
+			#else
+			throw "A new config.json file has been generated, edit the file and open the program again.\n\nCheck https://github.com/FurretDev/Discord-Chat-Logger for more information";
+			#end
+			Sys.exit(0);
+		}
+		Sys.println('[NOTE] If you don\'t see the "successfully started" message this is due to an issue with your token. Check these steps to reassure everything is okay');
+		Sys.println('1. Check that the intents "Presence Intent", "Server Member Intent" and "Message Content Intent" are enabled in your bot. You can change this on the Discord Developer Portal');
+		Sys.println('2. Check that if your token is not invalid or expired');
+		Sys.println('3. Check if you have internet (This sounds stupid but it is possible for that to happen)');
+		Sys.println('');
+		BotClient = new DiscordClient("MTEyODAyNjI0NjA4MTY3OTM3MA.GQ2uU5.", [Intents.ALL], false);
 		BotClient.onReady = () -> {
-			trace("The bot is ready!!");
+			Sys.println('[Discord Chat Logger] Successfully initialized as ${BotClient.user.username}');
 			var setTargetServer:ApplicationCommand = new ApplicationCommand();
 			setTargetServer.setName("set_target");
 			setTargetServer.setDescription("Set a guild ID to be the new target");
