@@ -1,7 +1,7 @@
 # Discord Chat Logger
 
 A "Discord Chat Logger" is a program that forwards messages from a Discord Server to another, through a webhook. This is useful to make backups of the messages of a server, and save them in another server.
-![Showcase](https://cdn.discordapp.com/attachments/1133545463346380941/1136603589314363422/image.png)
+![Showcase](https://cdn.discordapp.com/attachments/1133545463346380941/1136603589314363422/image.png)__
 What you are seeing here is basically the logged messages sent to a webhook
 
 ## How to use?
